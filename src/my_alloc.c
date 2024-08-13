@@ -33,14 +33,20 @@ void *my_alloc(int size)
     int block_count = 0;
     struct block_metadata *curr = heap_start;
 
-    while(curr->next != NULL && (curr->in_use == true || size < curr->size + sizeof(struct block_metadata)) )
+    while(curr->next != NULL)
     {
         printf("(%d): searching block at %p\n", block_count, curr);
-        curr = curr->next;
-        block_count++;
+        if (curr->in_use == false && size + sizeof(struct block_metadata) <= curr->size)
+        {
+            printf("found a block that has been freed at %p!\n", curr);
+            break;
+        } else {
+            curr = curr->next;
+            block_count++;
+        }
     }
 
-    printf("\n\nfound at %d\n\n", block_count);
+    printf("found at %d with addr %p\n", block_count, curr);
 
     // if we hit the last block device
     if (curr->next == NULL)
@@ -63,13 +69,15 @@ void *my_alloc(int size)
         return new_block->metadata_end;
     }
 
+    printf("hihihi\n");
 
     // this is to check if we have freed a block device before break point
     // we can cut it up again OR we can give them the entire block device and say its in use
     if (curr->in_use == false && curr->size >= size + sizeof(struct block_metadata))
     {
         // check if the block has enough space to store sizeof(struct block_metadata) when cut up
-        
+        // fuck it lets give it the entire block for now
+        printf("passed");
     }
 }
 
@@ -79,10 +87,11 @@ void my_free(void *ptr)
     int block_count = 0;
     while (curr != NULL && curr->metadata_end != ptr)
     {
-        debug_print_metadata(curr);
         curr = curr->next;
         block_count++;
     }
+
+    printf("attempting to free %p\n", ptr);
 
     if (curr == NULL)
     {
@@ -90,6 +99,9 @@ void my_free(void *ptr)
         return;
     }
 
-    curr->in_use = false;
-    printf("successfully freed %p\n", ptr);
+    if (curr->metadata_end == ptr)
+    {
+        curr->in_use = false;
+        printf("successfully freed %p (metadata block starts at %p)\n", ptr, curr);
+    }
 }

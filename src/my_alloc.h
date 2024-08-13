@@ -6,7 +6,7 @@
 struct block_metadata
 {
     bool in_use;
-    int size;
+    int size;   // size of thhe entire size of the block including the metadata
     struct block_metadata *next;
     struct block_metadata *metadata_end;
 };
