@@ -74,6 +74,29 @@ void *my_alloc(int size)
     return new_block->meta_end;
 }
 
+void defrag()
+{
+    block *curr = heap_head;
+    block *prev = NULL;
+
+    while (curr->next != NULL)
+    {
+        // never attempt to defrag on heap_head
+        if (curr != heap_head && (prev->in_use == false && curr->in_use == false))
+        {
+            prev->size = prev->size + curr->size;
+            prev->next = curr->next;
+
+            curr = prev;
+            curr = curr->next;
+        } else {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
+
+}
+
 void my_free(void *ptr)
 {
     block *curr = heap_head;
@@ -87,6 +110,10 @@ void my_free(void *ptr)
     {
         curr->in_use = false;
         fprintf(stderr, "Free on block %p with data at %p successful!\n", curr, curr->meta_end);
-        return;
+    } else {
+        fprintf(stderr, "Failed - check if %p is a my_alloc'd pointer?\n", ptr);
     }
+
+    // defrag connected blocks
+    defrag();
 }

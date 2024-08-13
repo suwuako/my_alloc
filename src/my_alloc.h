@@ -16,6 +16,7 @@ void init_heap();
 void debug_heap();
 void *my_alloc(int size);
 void my_free(void *ptr);
+void defrag();
 
 
 #endif
