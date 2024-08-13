@@ -33,16 +33,17 @@ void debug_heap()
             fprintf(stderr, ">>> HEAD <<<\n");
         }
         fprintf(stderr, "=== CURRENT BLOCK: %p ===\n", curr);
-        fprintf(stderr, "\tsize: %d\n", curr->size);
+        fprintf(stderr, "\ttotal size: %d\n", curr->size);
+        fprintf(stderr, "\talloc size: %d\n", curr->size - sizeof(block));
         fprintf(stderr, "\tin_use: %d\n", curr->in_use);
         fprintf(stderr, "\tnext: %p\n", curr->next);
         fprintf(stderr, "\tmeta_end: %p\n", curr->meta_end);
-        fprintf(stderr, "=== END OF BLOCK ===\n\n");
+        fprintf(stderr, "=== END OF BLOCK ===\n");
 
         curr = curr->next;
     }
 
-    fprintf(stderr, ">>>  null! <<<\n");
+    fprintf(stderr, ">>>  null! <<<\n\n");
 }
 
 void create_new_block(int size, block *curr, block *new_block)
@@ -115,7 +116,7 @@ void defrag()
     block *curr = heap_head;
     block *prev = NULL;
 
-    while (curr->next != NULL)
+    while (curr != NULL)
     {
         // never attempt to defrag on heap_head
         if (curr != heap_head && (prev->in_use == false && curr->in_use == false))

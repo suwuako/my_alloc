@@ -37,9 +37,17 @@ int main(void)
     debug_heap();
 
     int *int4 = my_alloc(sizeof(int));
-    *int4 = 8;
+    *int4 = 16;
 
     debug_heap();
 
+    int *int5 = my_alloc(56 - sizeof(block));
+    *int5 = 32;
+
+    my_free(many_ints);
+    my_free(int4);
+    my_free(int5);
+
+    debug_heap();
     return 0;
 }
