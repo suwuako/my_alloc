@@ -45,6 +45,39 @@ void debug_heap()
     fprintf(stderr, ">>>  null! <<<\n");
 }
 
+void create_new_block(int size, block *curr, block *new_block)
+{
+    int new_block_size = sizeof(block) + size;
+
+    new_block->size = new_block_size;
+    new_block->in_use = true;
+    new_block->meta_end = new_block + sizeof(block);
+    new_block->next = NULL;
+
+    curr->next = new_block;
+}
+
+void split_block(int alloc_size, block *curr)
+{
+    // check if size if exactly alloc_size or there isn't enough space to store metadata + alloc size
+    if (curr->size == alloc_size + sizeof(block)) {
+        curr->in_use = true;
+        curr->meta_end = curr + sizeof(block);
+        return;
+    } else if (curr->size >= alloc_size + sizeof(block)) {
+        block *new_block = alloc_size + curr + sizeof(block);
+        new_block->next = curr->next;
+        new_block->in_use = false;
+        new_block->meta_end = new_block + sizeof(block);
+        new_block->size = curr->size - alloc_size - sizeof(block);
+
+        curr->next = new_block;
+        curr->size = alloc_size + sizeof(block);
+        curr->in_use = true;
+    }
+
+}
+
 void *my_alloc(int size)
 {
     init_heap();
@@ -54,21 +87,24 @@ void *my_alloc(int size)
     // inits head if not defined
     while (curr->next != NULL)
     {
+        if (curr->in_use == false && curr->size >= size + sizeof(block))
+        {
+            fprintf(stderr, "found a freed block at %p!\n", curr);
+            break;
+        }
         curr = curr->next;
     }
 
     // if malloc is called and there are no free previous blocks
-    if (curr->next == NULL)
-    {
-        int new_block_size = sizeof(block) + size;
-        new_block = sbrk(new_block_size);
+    if (curr->next == NULL) {
+        new_block = sbrk(sizeof(block) + size);
 
-        new_block->in_use = true;
-        new_block->size = new_block_size;
-        new_block->next = NULL;
-        new_block->meta_end = new_block + sizeof(block);
-
-        curr->next = new_block;
+        create_new_block(size, curr, new_block);
+    } else if (curr->in_use == false && curr->size >= size + sizeof(block)) {
+        split_block(size, curr);
+        new_block = curr;
+    } else {
+        fprintf(stderr, "wtf???????????????????????????????????????????\n");
     }
 
     return new_block->meta_end;
@@ -106,8 +142,7 @@ void my_free(void *ptr)
     }
 
     // user inputted correct ptr to be freed
-    if (curr->meta_end == ptr)
-    {
+    if (curr->meta_end == ptr) {
         curr->in_use = false;
         fprintf(stderr, "Free on block %p with data at %p successful!\n", curr, curr->meta_end);
     } else {

@@ -17,6 +17,8 @@ void debug_heap();
 void *my_alloc(int size);
 void my_free(void *ptr);
 void defrag();
+void create_new_block(int size, block *curr, block *new_block);
+void split_block(int alloc_size, block *curr);
 
 
 #endif

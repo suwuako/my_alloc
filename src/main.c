@@ -5,9 +5,9 @@
 
 /*
  *  TODO:
- *   - [ ] defrag memory blocks
- *   - [ ] make use of freed blocks
- *      - [ ] cut block up to only fit requested size
+ *   - [x] defrag memory blocks
+ *   - [x] make use of freed blocks
+ *      - [x] cut block up to only fit requested size
  */
 
 // malloc takes in a length argument, allocates it to vram and 
@@ -36,6 +36,10 @@ int main(void)
     my_free(int3);
     debug_heap();
 
+    int *int4 = my_alloc(sizeof(int));
+    *int4 = 8;
+
+    debug_heap();
 
     return 0;
 }
