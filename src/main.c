@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void *my_alloc(int len)
-{
-    return sbrk(len);
-}
+#include "my_alloc.h"
 
 // malloc takes in a length argument, allocates it to vram and 
 // returns a pointer to the front of that block of memory
